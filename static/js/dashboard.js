@@ -5,6 +5,11 @@
 // ===================================
 let currentFilter = "all";
 
+function getCsrfToken() {
+  const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+  return tokenMeta ? tokenMeta.getAttribute("content") : null;
+}
+
 // ===================================
 // Toast Notifications
 // ===================================
@@ -46,10 +51,12 @@ async function completeHabit(habitId, isCustom = false) {
   checkBtn.disabled = true;
 
   try {
+    const csrfToken = getCsrfToken();
     const response = await fetch("/api/complete-habit", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
       },
       body: JSON.stringify({
         habit_id: habitId,
@@ -230,10 +237,12 @@ async function addHabit(event) {
   }
 
   try {
+    const csrfToken = getCsrfToken();
     const response = await fetch("/api/add-habit", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
       },
       body: JSON.stringify({ name, xp, category }),
     });
@@ -311,10 +320,12 @@ async function deleteHabit(habitId) {
   } */
 
   try {
+    const csrfToken = getCsrfToken();
     const response = await fetch("/api/delete-habit", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
       },
       body: JSON.stringify({ habit_id: habitId }),
     });

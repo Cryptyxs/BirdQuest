@@ -686,6 +686,11 @@
 </div>
 
 <script>
+    function getCsrfToken() {
+        const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+        return tokenMeta ? tokenMeta.getAttribute('content') : null;
+    }
+
     // Filter functionality
     document.querySelectorAll('.filter-tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -706,9 +711,13 @@
     // Buy bird function
     async function buyBird(birdId) {
         try {
+            const csrfToken = getCsrfToken();
             const response = await fetch('/api/buy-bird', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {}),
+                },
                 body: JSON.stringify({ bird_id: birdId }),
             });
 
@@ -756,9 +765,13 @@
     // Equip bird function
     async function equipBird(birdId, useShiny = false) {
         try {
+            const csrfToken = getCsrfToken();
             const response = await fetch('/api/equip-bird', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {}),
+                },
                 body: JSON.stringify({ bird_id: birdId, shiny: useShiny }),
             });
 

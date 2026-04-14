@@ -8,14 +8,20 @@ sys.path.insert(0, project_dir)
 from app import app, db, User, OwnedBird
 from werkzeug.security import generate_password_hash
 
-USERNAME = "ShinyBird"
-EMAIL    = "shiny@birdquest.com"
-PASSWORD = "SUPANINJA"
+USERNAME = os.environ.get("GOD_ACCOUNT_USERNAME", "ShinyBird")
+EMAIL = os.environ.get("GOD_ACCOUNT_EMAIL", "shiny@birdquest.com")
+PASSWORD = os.environ.get("GOD_ACCOUNT_PASSWORD")
 
 SEEDS = 999_999
 LEVEL = 99
 
 def create_god_account():
+    if not PASSWORD:
+        raise RuntimeError(
+            "GOD_ACCOUNT_PASSWORD is required. "
+            "Set it as an environment variable before running this script."
+        )
+
     with app.app_context():
         print("Creating / upgrading god account...")
 
@@ -73,7 +79,7 @@ def create_god_account():
         print("\n" + "="*60)
         print("Created and equipped")
         print(f"   Username : {USERNAME}")
-        print(f"   Password : {PASSWORD}")
+        print("   Password : [provided via GOD_ACCOUNT_PASSWORD]")
         print(f"   Level    : {LEVEL}")
         print(f"   Seeds    : {SEEDS:,}")
         print(f"   Equipped : SHINY {bird_name}")

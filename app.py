@@ -23,12 +23,27 @@ from flask_login import (
     current_user as _current_user,
 )
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 
 # Configuration for Railway deployment
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", os.urandom(24).hex())
+
+# Security cookie defaults for authenticated sessions.
+is_production = (
+    os.environ.get("VERCEL") == "1"
+    or os.environ.get("FLASK_ENV") == "production"
+    or os.environ.get("ENV") == "production"
+)
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["REMEMBER_COOKIE_HTTPONLY"] = True
+app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
+if is_production:
+    app.config["SESSION_COOKIE_SECURE"] = True
+    app.config["REMEMBER_COOKIE_SECURE"] = True
 
 # Prefer Neon URL when provided, then fallback to generic DATABASE_URL, then SQLite.
 database_url = (
@@ -41,8 +56,12 @@ database_url = (
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
+# Prefer psycopg v3 driver when using PostgreSQL URLs.
+if database_url.startswith("postgresql://"):
+    database_url = database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+
 # Neon requires SSL; enforce it if not already present in the URL.
-if database_url.startswith("postgresql://") and "sslmode=" not in database_url:
+if database_url.startswith("postgresql+psycopg://") and "sslmode=" not in database_url:
     separator = "&" if "?" in database_url else "?"
     database_url = f"{database_url}{separator}sslmode=require"
 
@@ -51,6 +70,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
 
 db = SQLAlchemy(app)
+csrf = CSRFProtect(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"

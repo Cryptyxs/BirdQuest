@@ -276,12 +276,19 @@ function throttle(func, limit) {
     };
 }
 
+function getCsrfToken() {
+    const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+    return tokenMeta ? tokenMeta.getAttribute('content') : null;
+}
+
 // Fetch wrapper with error handling
 async function fetchJSON(url, options = {}) {
     try {
+        const csrfToken = getCsrfToken();
         const response = await fetch(url, {
             headers: {
                 'Content-Type': 'application/json',
+                ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {}),
                 ...options.headers
             },
             ...options

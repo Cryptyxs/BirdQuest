@@ -47,6 +47,7 @@ block extra_css %}
             action="{{ url_for('register') }}"
             class="auth-form"
         >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <div class="form-group">
                 <label for="username">
                     <span class="icon">👤</span>

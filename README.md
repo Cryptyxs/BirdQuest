@@ -132,3 +132,8 @@ BirdQuest/
 - **Authentication**: Flask-Login
 - **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
 - **Styling**: Custom CSS with CSS Variables
+
+## Security Notes
+
+- Keep all secrets in environment variables (for example `SECRET_KEY` and `NEON_DATABASE_URL`).
+- If you use `CreateLegendaryAccount.py`, set `GOD_ACCOUNT_PASSWORD` in your environment before running it.
