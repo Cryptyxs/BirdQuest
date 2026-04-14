@@ -29,16 +29,26 @@ app = Flask(__name__)
 
 # Configuration for Railway deployment
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", os.urandom(24).hex())
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-    "DATABASE_URL", "sqlite:///birdquest.db"
-)
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Fix for Railway PostgreSQL URL (if using postgres)
-if app.config["SQLALCHEMY_DATABASE_URI"].startswith("postgres://"):
-    app.config["SQLALCHEMY_DATABASE_URI"] = app.config[
-        "SQLALCHEMY_DATABASE_URI"
-    ].replace("postgres://", "postgresql://", 1)
+# Prefer Neon URL when provided, then fallback to generic DATABASE_URL, then SQLite.
+database_url = (
+    os.environ.get("NEON_DATABASE_URL")
+    or os.environ.get("DATABASE_URL")
+    or "sqlite:///birdquest.db"
+)
+
+# Fix legacy postgres scheme for SQLAlchemy.
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+# Neon requires SSL; enforce it if not already present in the URL.
+if database_url.startswith("postgresql://") and "sslmode=" not in database_url:
+    separator = "&" if "?" in database_url else "?"
+    database_url = f"{database_url}{separator}sslmode=require"
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
 
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -802,21 +812,25 @@ def get_stats():
 # Initialize database
 def init_db():
     with app.app_context():
-        # Get the instance folder path (where Flask-SQLAlchemy stores the db)
-        instance_path = app.instance_path
-        db_filename = app.config["SQLALCHEMY_DATABASE_URI"].replace("sqlite:///", "")
-        db_path = os.path.join(instance_path, db_filename)
+        db_uri = app.config["SQLALCHEMY_DATABASE_URI"]
+        is_sqlite = db_uri.startswith("sqlite:///")
+        db_exists = True
 
-        # Ensure instance folder exists
-        if not os.path.exists(instance_path):
-            os.makedirs(instance_path)
-            print(f"📁 Created instance folder: {instance_path}")
+        if is_sqlite:
+            # SQLite uses a local file under instance/.
+            instance_path = app.instance_path
+            db_filename = db_uri.replace("sqlite:///", "")
+            db_path = os.path.join(instance_path, db_filename)
 
-        # Check if database file exists
-        db_exists = os.path.exists(db_path)
+            if not os.path.exists(instance_path):
+                os.makedirs(instance_path)
+                print(f"📁 Created instance folder: {instance_path}")
 
-        if not db_exists:
-            print(f"📁 Database not found at {db_path}. Creating new database...")
+            db_exists = os.path.exists(db_path)
+            if not db_exists:
+                print(f"📁 Database not found at {db_path}. Creating new database...")
+        else:
+            print("🌐 Using external PostgreSQL database (Neon/Railway).")
 
         # Create all tables if they don't exist
         db.create_all()
@@ -834,10 +848,13 @@ def init_db():
                 print("✅ Database tables verified!")
         except Exception as e:
             print(f"⚠️ Error verifying tables: {e}")
-            # Force recreate tables
-            db.drop_all()
-            db.create_all()
-            print("✅ Database tables recreated!")
+            # Avoid destructive reset for managed databases.
+            if is_sqlite:
+                db.drop_all()
+                db.create_all()
+                print("✅ Database tables recreated!")
+            else:
+                raise
 
 
 # Initialize database on import (needed for Railway)

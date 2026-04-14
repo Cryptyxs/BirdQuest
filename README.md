@@ -4,24 +4,24 @@
 
 BirdQuest is a gamified habit-tracking and productivity app designed for students. Complete real-life tasks, earn XP, level up, and collect beautiful birds along the way!
 
-## ✨ Features
+## Features
 
-- **📚 Student-Focused Habits**: Pre-built habits relevant to students including study sessions, homework, exercise, reading, and more
-- **🔥 Streak Tracking**: Build momentum with daily streaks to stay motivated
-- **⭐ XP & Leveling System**: Earn experience points for completing tasks and level up your account
-- **🌱 Seeds Currency**: Earn seeds when you level up to spend in the bird shop
-- **🐦 Bird Collection**: Collect birds of different rarities from Common to Legendary
-- **✨ Shiny Variants**: 1% chance to get a shiny bird with special effects and bonus multipliers
-- **📊 Progress Dashboard**: Visual tracking of your habits, XP, and statistics
+- **Student-Focused Habits**: Pre-built habits relevant to students including study sessions, homework, exercise, reading, and more
+- **Streak Tracking**: Build momentum with daily streaks to stay motivated
+- **XP & Leveling System**: Earn experience points for completing tasks and level up your account
+- **Seeds Currency**: Earn seeds when you level up to spend in the bird shop
+- **Bird Collection**: Collect birds of different rarities from Common to Legendary
+- **Shiny Variants**: 1% chance to get a shiny bird with special effects and bonus multipliers
+- **Progress Dashboard**: Visual tracking of your habits, XP, and statistics
 
-## 🎮 How It Works
+## How It Works
 
 1. **Add Your Habits**: Choose from student-focused habits or create custom tasks
 2. **Complete & Earn XP**: Check off habits daily to earn experience points
 3. **Level Up & Get Seeds**: Accumulate XP to level up and earn seeds
 4. **Collect Amazing Birds**: Spend seeds in the shop to unlock new birds with unique effects
 
-## 🦜 Bird Rarities & Multipliers
+## Bird Rarities & Multipliers
 
 | Rarity | Seed Multiplier | Shiny Multiplier | Background Effect |
 |--------|-----------------|------------------|-------------------|
@@ -33,7 +33,7 @@ BirdQuest is a gamified habit-tracking and productivity app designed for student
 
 **Shiny birds** have a 1% chance to appear when purchasing and feature sparkle effects with a golden outline!
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -71,7 +71,7 @@ BirdQuest is a gamified habit-tracking and productivity app designed for student
 
 5. **Open your browser** and navigate to `http://localhost:5000`
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 BirdQuest/
@@ -97,7 +97,7 @@ BirdQuest/
     └── shop.html          # Bird shop
 ```
 
-## 🎯 Available Habits
+## Available Habits
 
 ### Study
 - Study for 30 minutes (+15 XP)
@@ -125,42 +125,10 @@ BirdQuest/
 ### Custom
 - Create your own habits with custom XP values!
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 - **Backend**: Flask (Python)
-- **Database**: SQLite with SQLAlchemy ORM
+- **Database**: Neon PostgreSQL
 - **Authentication**: Flask-Login
 - **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
 - **Styling**: Custom CSS with CSS Variables
-
-## 📱 Screenshots
-
-### Home Page
-The landing page explains the app and its benefits for students.
-
-### Dashboard
-Track your habits, view your current bird, and monitor your progress.
-
-### Bird Shop
-Browse and purchase birds of different rarities with your earned seeds.
-
-## 🔧 Configuration
-
-The app uses SQLite by default. The database file (`birdquest.db`) is created automatically when you first run the application.
-
-To customize the configuration, you can modify these settings in `app.py`:
-
-```python
-app.config["SECRET_KEY"] = "your-secret-key"  # Change for production
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///birdquest.db"
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request

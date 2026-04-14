@@ -13,21 +13,24 @@ def check_and_init_database():
     from app import CompletedHabit, CustomHabit, HiddenHabit, OwnedBird, User, app, db
 
     with app.app_context():
-        # Get the instance folder path (where Flask-SQLAlchemy stores the db)
-        instance_path = app.instance_path
-        db_filename = app.config["SQLALCHEMY_DATABASE_URI"].replace("sqlite:///", "")
-        db_path = os.path.join(instance_path, db_filename)
+        db_uri = app.config["SQLALCHEMY_DATABASE_URI"]
+        is_sqlite = db_uri.startswith("sqlite:///")
+        db_exists = True
 
-        # Ensure instance folder exists
-        if not os.path.exists(instance_path):
-            os.makedirs(instance_path)
-            print(f"📁 Created instance folder: {instance_path}")
+        if is_sqlite:
+            instance_path = app.instance_path
+            db_filename = db_uri.replace("sqlite:///", "")
+            db_path = os.path.join(instance_path, db_filename)
 
-        # Check if database file exists
-        db_exists = os.path.exists(db_path)
+            if not os.path.exists(instance_path):
+                os.makedirs(instance_path)
+                print(f"📁 Created instance folder: {instance_path}")
 
-        if not db_exists:
-            print(f"📁 Database not found at {db_path}. Creating new database...")
+            db_exists = os.path.exists(db_path)
+            if not db_exists:
+                print(f"📁 Database not found at {db_path}. Creating new database...")
+        else:
+            print("🌐 Using external PostgreSQL database (Neon/Railway).")
 
         # Create all tables
         db.create_all()
@@ -46,10 +49,16 @@ def check_and_init_database():
             tables_ok = False
 
         if not tables_ok:
-            print("🔄 Recreating database tables...")
-            db.drop_all()
-            db.create_all()
-            print("✅ Database tables recreated!")
+            if is_sqlite:
+                print("🔄 Recreating database tables...")
+                db.drop_all()
+                db.create_all()
+                print("✅ Database tables recreated!")
+            else:
+                raise RuntimeError(
+                    "Table verification failed on external database. "
+                    "Skipping destructive reset."
+                )
         elif not db_exists:
             print("✅ Database and tables created successfully!")
         else:
